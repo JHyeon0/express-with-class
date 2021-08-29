@@ -13,6 +13,12 @@
     <p class="age">나이</p>
     <p class="characteristic">특성</p>
   </main>
+  <form id="form" action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="image" multiple/>
+    <input type="text" name="title" />
+    <button type="submit">업로드</button>
+  </form>
   <script src="http://localhost:3000/static/myPage.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </body>
 </html>

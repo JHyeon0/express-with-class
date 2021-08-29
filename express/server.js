@@ -1,10 +1,32 @@
 const express = require('express');
+const fs = require('fs')
 const cors = require('cors');
 const path = require('path');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+// form의 enctype="multipart/formdata", 이미지 받아올 때
 const multer = require('multer');
+
+try {
+  fs.readdirSync('uploads');
+} catch (error) {
+  console.error('uploads 폴더 없음');
+  fs.mkdirSync('uploads')
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination(req, file, done){
+      done(null, 'uploads/') // 첫 번째 인자: 에러처리 미들웨어, 두 번째 인자 : 성공 할 때
+    },
+    filename(req, file, done){
+      const ext = path.extname(file.originalname); // 확장자
+      done(null, path.basename(file.originalname, ext) + Date.now() + ext);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+})
 
 const app = express();
 
@@ -17,7 +39,7 @@ app.use(morgan('dev'));
 app.use('/static', (req, res, next)=>{
   // 로그인 한 유저에게만 static file 접근 권한
   // 미들웨어 확장법
-  if(req.session.id){
+  if(true || req.session.id){
     express.static(path.join(__dirname, 'public'))(req,res,next)
   } else {
     next();
@@ -51,6 +73,11 @@ app.use((req, res, next)=>{
   }
 })
 
+app.post('upload', upload.single('image'), (req, res)=>{
+  console.log(req.file);
+  res.send({ message: 'SUCCESS' });
+})
+
 app.get('/myeonghyeon', (req, res)=>{
   res.send({ 
     name: '이명현', 
@@ -74,7 +101,7 @@ app.get('/ping', (req, res, next)=>{
 })
 
 app.get('/ping', (req, res)=>{
-  res.send({ result: "from next router" })
+  res.send({ result: "from next router, pong~" })
 })
 
 
